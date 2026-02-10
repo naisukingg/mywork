@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Indie_Flower } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/navbar";
+import Providers from "@/app/providers";
 
 const indieFlower = Indie_Flower({
   weight: "400",
@@ -21,8 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${indieFlower.className} antialiased`}>
-        <Navbar />
-        {children}
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

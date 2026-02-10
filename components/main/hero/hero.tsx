@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import React, { useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 export type AetherHeroProps = {
   fragmentSource?: string;
@@ -196,12 +197,12 @@ export default function AetherHero({
           {'create click-worthy thumbnails in seconds.\nLet AI design professional visuals for your videos'}
         </p>
 
-        <a
-          href="#get-started"
+        <Link
+          href="/auth"
           className="mt-[22px] inline-block rounded-[14px] bg-[rgba(12,16,28,0.92)] px-7 py-3 text-base font-bold text-white no-underline shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_10px_28px_rgba(0,0,0,0.35)] transition-all duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.26),0_14px_34px_rgba(0,0,0,0.45)]"
         >
           Get Started
-        </a>
+        </Link>
       </div>
     </section>
   );
