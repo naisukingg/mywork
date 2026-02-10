@@ -13,11 +13,11 @@ import type { Session, User } from '@supabase/supabase-js';
 import { getSupabaseClient, hasSupabaseEnv } from '@/lib/supabase/client';
 
 type AuthContextValue = {
-  user: User | null;
-  session: Session | null;
+  user: User | null; //유저 인식
+  session: Session | null; //로딩 상태 인식
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>; //구글로 로그인
+  signOut: () => Promise<void>; //구글로 로그아웃
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
