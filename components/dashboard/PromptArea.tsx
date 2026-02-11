@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type FormEvent, type SVGProps } from 'react';
 import { BorderBeam } from '@/components/dashboard/BorderBeam';
+import { useAuth } from '@/context/AuthContext';
 
 const PlusIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="none" {...props}>
@@ -35,10 +36,15 @@ const Settings2Icon = (props: SVGProps<SVGSVGElement>) => (
 );
 
 export default function PromptArea() {
+  const { session } = useAuth();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [value, setValue] = useState('');
   const [imageName, setImageName] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+  const [generatedText, setGeneratedText] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
@@ -47,10 +53,50 @@ export default function PromptArea() {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 260)}px`;
   }, [value]);
 
-  const canSubmit = value.trim().length > 0 || imageName.length > 0;
+  const canSubmit = value.trim().length > 0;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!session?.access_token) {
+      setErrorMessage('Session expired. Please sign in again.');
+      return;
+    }
+    if (!value.trim()) {
+      setErrorMessage('Please enter a prompt.');
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      setErrorMessage(null);
+      setGeneratedText(null);
+
+      const response = await fetch('/api/thumbnails/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          prompt: value.trim(),
+          aspectRatio: '16:9',
+          imageSize: '2K',
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.detail || payload?.error || 'Failed to generate image.');
+      }
+
+      setGeneratedImageUrl(payload?.imageUrl || null);
+      setGeneratedText(payload?.text || null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to generate image.';
+      setErrorMessage(message);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -107,7 +153,7 @@ export default function PromptArea() {
 
           <button
             type="submit"
-            disabled={!canSubmit}
+            disabled={!canSubmit || isGenerating}
             className="grid h-9 w-9 place-items-center rounded-full bg-white/90 text-black transition hover:bg-white disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-black/60"
             aria-label="Send prompt"
           >
@@ -125,6 +171,25 @@ export default function PromptArea() {
           borderWidth={1.5}
         />
       </div>
+
+      {isGenerating && (
+        <p className="mt-3 text-sm text-white/70 [font-family:'Space_Grotesk',sans-serif]">Generating thumbnail...</p>
+      )}
+      {errorMessage && (
+        <p className="mt-3 text-sm text-red-300 [font-family:'Space_Grotesk',sans-serif]">{errorMessage}</p>
+      )}
+      {generatedText && (
+        <p className="mt-3 text-sm text-white/70 [font-family:'Space_Grotesk',sans-serif]">{generatedText}</p>
+      )}
+      {generatedImageUrl && (
+        <div className="mt-5 overflow-hidden rounded-2xl border border-white/15 bg-black/20 p-2 shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+          <img
+            src={generatedImageUrl}
+            alt="Generated thumbnail"
+            className="h-auto w-full rounded-xl object-cover"
+          />
+        </div>
+      )}
     </form>
   );
 }
