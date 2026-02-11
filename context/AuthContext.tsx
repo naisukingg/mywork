@@ -58,9 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     const supabase = getSupabaseClient();
+    const nextPath = encodeURIComponent('/dashboard');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth` },
+      options: { redirectTo: `${window.location.origin}/auth?next=${nextPath}` },
     });
     if (error) throw error;
   }, []);

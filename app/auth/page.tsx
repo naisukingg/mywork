@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 const FRAGMENT_SHADER = `#version 300 es
@@ -47,11 +48,20 @@ void main(){ gl_Position = vec4(position, 0.0, 1.0); }
 `;
 
 export default function AuthPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const { user, signInWithGoogle } = useAuth();
+  const { user, loading, signInWithGoogle } = useAuth();
+  const nextPath = searchParams.get('next') || '/dashboard';
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace(nextPath);
+    }
+  }, [loading, nextPath, router, user]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -181,15 +191,15 @@ export default function AuthPage() {
           <div className="w-full max-w-lg rounded-[32px] bg-white/[0.04] p-8 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_30px_80px_rgba(0,0,0,0.5)] backdrop-blur-[24px] [font-family:'Space_Grotesk',sans-serif] sm:p-10">
             <p className="text-lg font-medium text-white/80">Sign in with Google to continue.</p>
             <p className="mt-1 text-sm text-white/60">
-              {user ? 'You are already signed in.' : 'One click gets you into Nailart AI.'}
+              {user ? 'You are already signed in. Redirecting to dashboard...' : 'One click gets you into Nailart AI.'}
             </p>
 
             {user ? (
               <Link
-                href="/"
+                href={nextPath}
                 className="mt-7 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-[rgba(12,16,28,0.92)] px-5 py-4 text-base font-bold text-white no-underline shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_10px_28px_rgba(0,0,0,0.35)] transition-all duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.26),0_14px_34px_rgba(0,0,0,0.45)]"
               >
-                Go to Home
+                Go to Dashboard
               </Link>
             ) : (
               <button

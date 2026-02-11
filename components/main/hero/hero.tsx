@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export type AetherHeroProps = {
   fragmentSource?: string;
@@ -62,6 +63,7 @@ export default function AetherHero({
   className = '',
   ariaLabel = 'YouTube thumbnail AI hero background',
 }: AetherHeroProps) {
+  const { user } = useAuth();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
   const bufRef = useRef<WebGLBuffer | null>(null);
@@ -198,10 +200,10 @@ export default function AetherHero({
         </p>
 
         <Link
-          href="/auth"
+          href={user ? '/dashboard' : '/auth'}
           className="mt-[22px] inline-block rounded-[14px] bg-[rgba(12,16,28,0.92)] px-7 py-3 text-base font-bold text-white no-underline shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_10px_28px_rgba(0,0,0,0.35)] transition-all duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.26),0_14px_34px_rgba(0,0,0,0.45)]"
         >
-          Get Started
+          {user ? 'Go to Dashboard' : 'Get Started'}
         </Link>
       </div>
     </section>

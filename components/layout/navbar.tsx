@@ -9,7 +9,10 @@ import { useAuth } from '@/context/AuthContext';
 export default function Navbar() {
   const pathname = usePathname();
   const isAuthPage = pathname.startsWith('/auth');
+  const isDashboardPage = pathname.startsWith('/dashboard');
   const { user, loading, signOut } = useAuth();
+
+  if (isDashboardPage) return null;
 
   return (
     <nav className={`fixed inset-x-0 top-0 z-[1000] flex items-center bg-transparent px-6 py-6 sm:px-10 lg:px-20 [font-family:'Space_Grotesk',sans-serif] ${isAuthPage ? 'justify-start' : 'justify-between'}`}>
@@ -36,10 +39,10 @@ export default function Navbar() {
 
       {!isAuthPage && (
         <Link
-          href="/auth"
+          href={user ? '/dashboard' : '/auth'}
           className="rounded-[14px] bg-[rgba(12,16,28,0.92)] px-7 py-3 text-base font-bold text-white no-underline shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),0_10px_28px_rgba(0,0,0,0.35)] transition-all duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.26),0_14px_34px_rgba(0,0,0,0.45)]"
         >
-          {loading ? 'Loading...' : user ? 'My Account' : 'Get Started'}
+          {loading ? 'Loading...' : user ? 'Dashboard' : 'Get Started'}
         </Link>
       )}
 
